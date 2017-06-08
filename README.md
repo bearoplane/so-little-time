@@ -29,6 +29,13 @@ All `todo`s need to have an `id` property. This should be added to the object ri
 ```
 
 
-==Next steps
+Still to-do
+====
+Visual design
+listen to events other than 'child_added' (for deleting and stuff)
+there is a visible little jitter when adding, clean up transitions and stuff
+just clean up code generally
 
+Next Steps
+====
 Implement Immutable in reducers and pages' `mapStateToProps` method
