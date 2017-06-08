@@ -1,5 +1,5 @@
-===so much to do,
-=So Little Time
+So Little Time
+====
 
 So Little Time is a basic To-Do app, the likes of which you are certainly familiar with.
 It is built with the following technologies:
