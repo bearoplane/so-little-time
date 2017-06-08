@@ -1,0 +1,15 @@
+{
+  "presets": [
+    ["env", { "modules": "commonjs" }],
+    "next/babel",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-decorators-legacy",
+    "styled-jsx/babel",
+    ["transform-runtime", {
+      "polyfill": false,
+      "regenerator": true
+    }]
+  ]
+}
