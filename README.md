@@ -20,6 +20,11 @@ Sagas handle all of the async, which in this case is just requests to Firebase
 
 NB. being unfamiliar with next.js, the structure is a bit strange
 
+Installation instructions
+====
+1. Run `npm install`
+2. Then run `npm run dev` and you're off to the races
+
 Still to-do
 ====
 * listen to events other than `child_added` (`child_removed` and `child_changed`), just need to attach to some other events because currently delete and update operations don't live reload for other people
