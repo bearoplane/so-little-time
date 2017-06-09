@@ -34,14 +34,9 @@ const {
    updated: {}
  }
 export default function todos (state = defaultState, action) {
+  // We have to share these among all of the cases in the switch statement
   let { type, todo, error } = action
   let newState, toDelete, toUpdate, toRevert, newData
-
-  if (typeof todo !== 'undefined') {
-    todo = {
-
-    }
-  }
 
   switch (type) {
     // the todo comes back as { [key]: data }, so we can ...spread it into state
@@ -68,12 +63,12 @@ export default function todos (state = defaultState, action) {
     case DELETE_TODO:
       console.log("ABOUT TO DELETE!", state, action)
       // TODO: check if I need to object.assign or if I can just use the object
-      newData = Object.assign({}, state.data)
+      newData = { ...state.data }
       toDelete = newData[action.todo.id]
-console.log('to delete', toDelete)
+
       // TODO: make sure the todo exists before trying to delete
       delete newData[action.todo.id]
-console.log('newState', newData, newData[action.todo.id])
+
       return {
         ...state,
         data: {
@@ -91,16 +86,16 @@ console.log('newState', newData, newData[action.todo.id])
         ...state,
         data: {
           ...state.data,
-          ...updated
+          [todo.id]: {
+            ...toUpdate,
+            ...todo
+          }
         },
-        updated: Object.assign({}, {
-          ...toUpdate,
-          ...todo
-        })
+        updated: toUpdate
       }
     case CREATE_TODO_FAILED:
       // Clone to avoid side-effects, keep it PUUURE
-      newState = Object.assign({}, state)
+      newState = { ...state }
 
       // TODO: make sure the todo exists before trying to remove it
       delete newState.data[todo.id]
@@ -159,15 +154,15 @@ console.log('newState', newData, newData[action.todo.id])
         ...state,
         updated: {}
       }
+    // This next one is a weird one
+    // Because we don't have the ID from Firebase yet, we created a temp item
+    // which we delete when we add the new one, causing the jitter
+    // There is a solution to this but I don't have time to solve it
     case CREATE_TODO_SUCCESS:
-      // action looks like
-      console.log('action?', action)
-
       // First remove the temp one from the store
       newData = { ...state.data }
-      console.log('new data', newData)
+
       delete newData[action.oldKey]
-      console.log('new data AGAIN', newData)
 
       return {
         ...state,

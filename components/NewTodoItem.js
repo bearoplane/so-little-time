@@ -1,4 +1,9 @@
 import React from 'react'
+import PropTypes from 'prop-types'
+
+import TextField from 'material-ui/TextField';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import ContentAdd from 'material-ui/svg-icons/content/add';
 
 class NewTodoItem extends React.Component {
   constructor(props) {
@@ -9,32 +14,32 @@ class NewTodoItem extends React.Component {
   }
 
   handleChange = (e) => {
+    console.log('hey there', e.target.value)
     this.setState({ value: e.target.value });
   }
 
-  onAddTodo = (e) => {
-    const { addTodo } = this.props
-    const { value } = this.state
-
-    const todo = {
-      text: value,
-      done: false,
-      timestamp: +new Date
-    }
-console.log('todo', todo)
-    addTodo(todo)
-  }
-
   render() {
+    const { addTodo } = this.props
     const { value } = this.state
 
     return (
       <div>
-        <input onChange={this.handleChange} type="text" value={value} />
-        <button onClick={ this.onAddTodo }>add</button>
+        <TextField
+          hintText="What do you need to do?"
+          id="text-field-controlled"
+          value={ value }
+          onChange={this.handleChange}
+        />
+        <FloatingActionButton onClick={ e => addTodo(value) } >
+          <ContentAdd />
+        </FloatingActionButton>
       </div>
     )
   }
+}
+
+NewTodoItem.PropTypes = {
+  addTodo: PropTypes.func.isRequired
 }
 
 export default NewTodoItem

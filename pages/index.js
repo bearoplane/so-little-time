@@ -1,30 +1,37 @@
-import { map } from 'lodash'
 import React, { Component, PropTypes } from 'react'
 import { bindActionCreators } from 'redux'
+import injectTapEventPlugin from 'react-tap-event-plugin'
 
 import withRedux from 'next-redux-wrapper'
 import configureStore from '../src/store'
 import * as actions from '../src/actions'
 
-import Link from 'next/link'
-import Head from 'next/head'
-import TodoItem from '../components/TodoItem'
+import TodoList from '../components/TodoList'
 import NewTodoItem from '../components/NewTodoItem'
 
-const isLoaded = function () {
-  if (!arguments || !arguments.length) {
-    return true
-  }
+import {deepOrange500} from 'material-ui/styles/colors'
+import getMuiTheme from 'material-ui/styles/getMuiTheme'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
-  return map(arguments, a => a !== undefined).reduce((a, b) => a && b)
-}
-const isEmpty = data => data === {}
+const muiTheme = getMuiTheme({
+  palette: {
+    accent1Color: deepOrange500,
+  },
+});
+
+// TODO: find out if this goes here or in the appWrapper component??
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+try {
+    injectTapEventPlugin();
+} catch(e) {}
 
 class Index extends React.Component {
   static getInitialProps({store, isServer, pathname, query}) {
-    store.dispatch(actions.fetchTodos())
+    if (isServer) {
+      store.dispatch(actions.fetchTodos())
+    }
 
-console.log('loaded!')
     return {
       data: {}
     }
@@ -39,56 +46,47 @@ console.log('loaded!')
     this.props.firebaseUnlisten()
   }
 
-  addTodo = (todo) => {
+  addTodo = (text) => {
     // unless you add more than one todo per millisecond... we should be okay
     // for the purposes of this app
     const id = +new Date
-    console.log('adding todo', todo)
+
     this.props.createTodo({
       id,
-      ...todo
+      text,
+      done: false,
+      timestamp: +new Date
     })
   }
 
-  toggleDone = (todo) => () => {
-    const newTodo = {
+  toggleDone = (todo) => {
+    this.props.updateTodo({
       ...todo,
       done: !todo.done
-    }
-    this.props.updateTodo(newTodo)
+    })
   }
 
-  deleteTodo = (todo) => () => {
+  deleteTodo = (todo) => {
     this.props.deleteTodo(todo)
   }
 
   render() {
-    const { firebase, todos } = this.props;
+    const { todos } = this.props;
 
-    // Build Todos list if todos exist and are loaded
-    const todosList = !isLoaded(todos)
-      ? 'Loading'
-      : isEmpty(todos)
-        ? 'Todo list is empty'
-        : Object.keys(todos).map(key => (
-          <TodoItem
-            key={key}
-            data={todos[key]}
+    return (
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <div>
+          <TodoList
+            todos={todos}
             toggleDone={this.toggleDone}
             deleteTodo={this.deleteTodo}
           />
-        ))
 
-    return (
-      <div>
-        <ol>{ todosList }</ol>
-
-        <div>
           <NewTodoItem
             addTodo={this.addTodo}
           />
         </div>
-      </div>
+      </MuiThemeProvider>
     )
   }
 }

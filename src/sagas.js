@@ -36,40 +36,28 @@ const {
   FIREBASE_UNLISTEN
 } = actionTypes
 
-const basePath = '/todos'
-const baseRef = firebase.database().ref(basePath)
-
-const fb = {
-  update: (item) => {
-    return getRefById(item.id).update(item)
-  },
-  remove: (item) => {
-    return getRefById(item.id).remove()
-  },
-  getAll: () => {
-    return baseRef.once('child_added', snapshot => snapshot.val())
-  },
-  listen: () => {
-    return baseRef.on('child_added', snapshot => snapshot.val())
-  },
-  unlisten: () => {
-    return baseRef.off('child_added')
-  }
-}
-
+// Some convenience functions for firebase access
 function* remove(item) {
-  const ref = firebase.database().ref(`${basePath}/${item.id}`)
+  const ref = firebase.database().ref(`/todos/${item.id}`)
 
   yield call([ref, ref.remove])
 }
 function* create(item) {
-  const result = yield call([baseRef, baseRef.push], item)
+  const ref = firebase.database().ref('/todos')
+
+  const result = yield call([ref, ref.push], item)
 
   return result.key
 }
+function* update(item) {
+  const ref = firebase.database().ref(`/todos/${item.id}`)
 
+  yield call([ref, ref.update], item)
+}
 function* getAll() {
-  const data = yield call([baseRef, baseRef.once], 'value');
+  const ref = firebase.database().ref('/todos')
+
+  const data = yield call([ref, ref.once], 'value');
 
   return data.val();
 }
@@ -80,6 +68,9 @@ export function* watchCreateTodo(action) {
   const tmpId = todo.id
   try {
     const newKey = yield call(create, todo)
+    // This is weird, because we are overwriting the temp object
+    // We need the old ID, aka the ID of the todo that was dispatched
+    // from the component
     yield put(createTodoSuccess(todo, tmpId, newKey))
   }
   catch (error) {
@@ -87,10 +78,9 @@ export function* watchCreateTodo(action) {
   }
 }
 export function* watchUpdateTodo(action) {
-  console.log('watchUpdateTodo')
   const { todo } = action
   try {
-    yield call(fb.update, todo)
+    yield call(update, todo)
     yield put(updateTodoSuccess(todo))
   }
   catch (error) {
@@ -98,11 +88,9 @@ export function* watchUpdateTodo(action) {
   }
 }
 export function* watchDeleteTodo(action) {
-  console.log('watchDeleteTodo')
   const { todo } = action
   try {
     yield call(remove, todo)
-    console.log('DONE!')
     yield put(deleteTodoSuccess(todo))
   }
   catch (error) {
@@ -111,10 +99,8 @@ export function* watchDeleteTodo(action) {
 }
 
 export function* watchFetchTodos(action) {
-  console.log('watchFetchTodos')
   try {
     const todos = yield call(getAll)
-    console.log('todos', todos)
     yield put(fetchTodosSuccess(todos))
   }
   catch (error) {
@@ -153,22 +139,6 @@ export function* watchFirebaseListen() {
   }
 }
 
-/*
-export function* watchFirebaseListen(action) {
-  console.log('watchFirebaseListen')
-  try {
-    yield put(firebaseConnected())
-    while (true) {
-      console.log('looping')
-      let todo = yield take(fb.listen)
-      yield put(receiveTodo(todo))
-    }
-  } finally {
-    console.log('Firebase connection terminated')
-    yield put(firebaseDisconnected())
-  }
-}
-*/
 export function* watchFirebaseUnlisten(action) {
   console.log('watchFirebaseUnlisten')
   try {

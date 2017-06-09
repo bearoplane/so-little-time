@@ -1,5 +1,6 @@
 import firebase from 'firebase'
 
+// This is insecure and all but the API is public anyway and won't exist in that state for long
 const firebaseConfig = {
   apiKey: 'AIzaSyCqNAYQliaXkr4EnsJbRrdnDZSi43KU4IQ',
   authDomain: 'so-little-time-78201.firebaseapp.com',

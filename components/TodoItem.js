@@ -1,17 +1,25 @@
 import React from 'react'
-import Link from 'next/link'
+import PropTypes from 'prop-types'
 
-class TodoItem extends React.Component {
-  render() {
-    const { data, toggleDone, deleteTodo } = this.props
-    return (
-      <li>
-        <strong>{ data.text }</strong>
-        <input type="checkbox" value={data.done} onChange={ toggleDone(data) } />
-        <button onClick={ deleteTodo(data) }>Remove</button>
-      </li>
-    )
-  }
+import { List, ListItem } from 'material-ui/List'
+import IconButton from 'material-ui/IconButton'
+
+import CheckboxBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
+import Checkbox from 'material-ui/svg-icons/toggle/check-box'
+import DeleteIcon from 'material-ui/svg-icons/action/delete'
+
+export default ({ todo, deleteTodo, toggleDone }) => {
+  return (
+    <ListItem
+      primaryText={ todo.text }
+      leftIcon={ todo.done ? <Checkbox /> : <CheckboxBlank /> }
+      rightIconButton={ <IconButton onClick={ e => {
+        // Although the Material-UI docs specify that the rightIconButton
+        // will automatically NOT bubble up, it does for some reason...
+        e.stopPropagation()
+        deleteTodo(todo)
+      } }><DeleteIcon /></IconButton> }
+      onClick={ e => toggleDone(todo) }
+    />
+  )
 }
-
-export default TodoItem
